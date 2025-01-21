@@ -48,7 +48,7 @@ const validationSchema = Yup.object({
 		.required("Password is required."),
 });
 
-export default function SignIn({ setIsActive }) {
+export default function SignIn({ setIsActive, setIsAdmin }) {
 	const navigate = useNavigate();
 	const [errorMessage, setErrorMessage] = React.useState("");
 
@@ -58,6 +58,20 @@ export default function SignIn({ setIsActive }) {
 
 		const trimmedEmail = values.email.trim();
 		const trimmedPassword = values.password.trim();
+
+		if (trimmedEmail === "admin@admin.ad" && trimmedPassword === "admin1111") {
+			const adminUser = {
+				email: trimmedEmail,
+				isActive: true,
+				isAdmin: true,
+			};
+
+			localStorage.setItem("user", JSON.stringify(adminUser));
+			setIsActive(true);
+			setIsAdmin(true);
+			navigate("/");
+			return;
+		}
 
 		const user = userList.find(
 			(user) =>
@@ -73,9 +87,8 @@ export default function SignIn({ setIsActive }) {
 			const updatedUser = { ...existingUser, ...user, avatar, isActive: true };
 
 			localStorage.setItem("user", JSON.stringify(updatedUser));
-
 			setIsActive(true);
-
+			setIsAdmin(false);
 			navigate("/");
 		} else {
 			setErrorMessage("Incorrect email or password.");

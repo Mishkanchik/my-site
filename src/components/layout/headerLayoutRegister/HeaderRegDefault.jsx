@@ -1,16 +1,16 @@
 import * as React from "react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Menu from "@mui/material/Menu";
-
-import Container from "@mui/material/Container";
-import Avatar from "@mui/material/Avatar";
-
-import Tooltip from "@mui/material/Tooltip";
-import MenuItem from "@mui/material/MenuItem";
+import {
+	AppBar,
+	Box,
+	Toolbar,
+	IconButton,
+	Typography,
+	Menu,
+	Container,
+	Avatar,
+	Tooltip,
+	MenuItem,
+} from "@mui/material";
 import AdbIcon from "@mui/icons-material/Adb";
 import { useNavigate } from "react-router";
 
@@ -18,8 +18,25 @@ const settings = ["Profile", "Logout"];
 
 function HeaderMainReg({ setIsActive }) {
 	const navigate = useNavigate();
-
 	const [anchorElUser, setAnchorElUser] = React.useState(null);
+	const [avatar, setAvatar] = React.useState("https://via.placeholder.com/100"); // Дефолтна аватарка
+
+	React.useEffect(() => {
+		const savedUser = JSON.parse(localStorage.getItem("user"));
+		if (savedUser?.avatar) {
+			setAvatar(savedUser.avatar);
+		}
+
+		const updateAvatar = () => {
+			const updatedUser = JSON.parse(localStorage.getItem("user"));
+			setAvatar(updatedUser?.avatar || "https://via.placeholder.com/100");
+		};
+
+		window.addEventListener("userUpdated", updateAvatar);
+		return () => {
+			window.removeEventListener("userUpdated", updateAvatar);
+		};
+	}, []);
 
 	const handleOpenUserMenu = (event) => {
 		setAnchorElUser(event.currentTarget);
@@ -28,17 +45,14 @@ function HeaderMainReg({ setIsActive }) {
 	const handleCloseUserMenu = () => {
 		setAnchorElUser(null);
 	};
-	const user = JSON.parse(localStorage.getItem("user"));
+
 	const handleSettingClick = (setting) => {
 		switch (setting) {
 			case "Profile":
 				navigate("/profile");
 				break;
 			case "Logout":
-				if (user) {
-					user.isActive = false;
-					localStorage.setItem("user", JSON.stringify(user));
-				}
+				localStorage.removeItem("user");
 				setIsActive(false);
 				navigate("/");
 				break;
@@ -46,10 +60,6 @@ function HeaderMainReg({ setIsActive }) {
 				console.log(`Unknown action for ${setting}`);
 		}
 		handleCloseUserMenu();
-	};
-
-	const handleOpenNavMenu = () => {
-		navigate("/");
 	};
 
 	return (
@@ -60,7 +70,7 @@ function HeaderMainReg({ setIsActive }) {
 						variant='h6'
 						noWrap
 						component='a'
-						onClick={handleOpenNavMenu}
+						onClick={() => navigate("/")}
 						sx={{
 							mr: 2,
 							display: { xs: "none", md: "flex" },
@@ -79,36 +89,19 @@ function HeaderMainReg({ setIsActive }) {
 					<Box sx={{ flexGrow: 0 }}>
 						<Tooltip title='Open settings'>
 							<IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-								<Avatar
-									alt='Remy Sharp'
-									src={
-										!user.avatar ? "/static/images/avatar/2.jpg" : user.avatar
-									}
-								/>
+								<Avatar alt='User Avatar' src={avatar} />
 							</IconButton>
 						</Tooltip>
 						<Menu
 							sx={{ mt: "45px" }}
-							id='menu-appbar'
 							anchorEl={anchorElUser}
-							anchorOrigin={{
-								vertical: "top",
-								horizontal: "right",
-							}}
-							keepMounted
-							transformOrigin={{
-								vertical: "top",
-								horizontal: "right",
-							}}
 							open={Boolean(anchorElUser)}
 							onClose={handleCloseUserMenu}>
 							{settings.map((setting) => (
 								<MenuItem
 									key={setting}
 									onClick={() => handleSettingClick(setting)}>
-									<Typography sx={{ textAlign: "center" }}>
-										{setting}
-									</Typography>
+									<Typography textAlign='center'>{setting}</Typography>
 								</MenuItem>
 							))}
 						</Menu>

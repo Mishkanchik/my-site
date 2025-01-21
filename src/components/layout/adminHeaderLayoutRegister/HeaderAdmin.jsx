@@ -16,7 +16,7 @@ import { useNavigate } from "react-router";
 
 const settings = ["Profile", "Admin Panel", "Logout"];
 
-function HeaderAdmin() {
+function HeaderAdmin({ setIsActive, setIsAdmin }) {
 	const navigate = useNavigate();
 
 	const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -28,23 +28,33 @@ function HeaderAdmin() {
 	const handleCloseUserMenu = () => {
 		setAnchorElUser(null);
 	};
-
+	const user = JSON.parse(localStorage.getItem("user"));
 	const handleSettingClick = (setting) => {
 		switch (setting) {
 			case "Profile":
-				navigate("profile");
+				navigate("/profile");
 				break;
 			case "Admin Panel":
-				navigate("adminPanel");
+				navigate("/adminPanel");
 				break;
 			case "Logout":
-				console.log("Logging out");
-
+				if (user) {
+					user.isActive = false;
+					user.isAdmin = false;
+					localStorage.setItem("user", JSON.stringify(user));
+				}
+				setIsActive(false);
+				setIsAdmin(false);
+				navigate("/");
 				break;
 			default:
 				console.log(`Unknown action for ${setting}`);
 		}
 		handleCloseUserMenu();
+	};
+
+	const handleOpenNavMenu = () => {
+		navigate("/");
 	};
 
 	return (
@@ -55,7 +65,7 @@ function HeaderAdmin() {
 						variant='h6'
 						noWrap
 						component='a'
-						href='#app-bar-with-responsive-menu'
+						onClick={handleOpenNavMenu}
 						sx={{
 							mr: 2,
 							display: { xs: "none", md: "flex" },
@@ -64,6 +74,7 @@ function HeaderAdmin() {
 							letterSpacing: ".3rem",
 							color: "inherit",
 							textDecoration: "none",
+							cursor: "pointer",
 						}}>
 						<AdbIcon
 							sx={{ display: { xs: "none", md: "flex" }, mr: 0.5, mt: 0.3 }}

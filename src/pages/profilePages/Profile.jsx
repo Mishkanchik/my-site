@@ -9,10 +9,12 @@ import {
 } from "@mui/material";
 
 const Profile = () => {
+	const defaultAvatar = "https://via.placeholder.com/100"; // Стандартна аватарка
+
 	const [user, setUser] = useState({
 		fullName: "",
 		password: "",
-		avatar: "",
+		avatar: defaultAvatar,
 	});
 
 	const [newPassword, setNewPassword] = useState("");
@@ -23,6 +25,10 @@ const Profile = () => {
 		const savedUser = JSON.parse(localStorage.getItem("user"));
 		if (savedUser) {
 			setUser(savedUser);
+		} else {
+			const newUser = { fullName: "", password: "", avatar: defaultAvatar };
+			setUser(newUser);
+			localStorage.setItem("user", JSON.stringify(newUser));
 		}
 	}, []);
 
@@ -30,6 +36,7 @@ const Profile = () => {
 		const updatedUser = { ...user, ...updatedFields };
 		setUser(updatedUser);
 		localStorage.setItem("user", JSON.stringify(updatedUser));
+		window.dispatchEvent(new Event("userUpdated")); // Подія для оновлення аватарки в іншому компоненті
 	};
 
 	const handleAvatarChange = () => {

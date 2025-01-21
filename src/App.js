@@ -11,17 +11,20 @@ import MainReg from "./pages/mainPages/mainPagesReg/MainReg";
 import MainAdmin from "./pages/mainPages/mainPagesAdmin/MainAdmin";
 import { useEffect, useState } from "react";
 import Profile from "./pages/profilePages/Profile";
+import AdminPanel from "./pages/adminPages/AdminPanel";
 
 function App() {
-	const IsAdmin = false;
+	const [isAdmin, setIsAdmin] = useState(false);
 	const [isActive, setIsActive] = useState(false);
 
 	useEffect(() => {
 		const user = JSON.parse(localStorage.getItem("user"));
 		if (user?.isActive) {
 			setIsActive(true);
+			setIsAdmin(user.isAdmin || false);
 		} else {
 			setIsActive(false);
+			setIsAdmin(false);
 		}
 	}, []);
 
@@ -33,21 +36,28 @@ function App() {
 						<Route index element={<Blog />} />
 						<Route
 							path='signIn'
-							element={<SignIn setIsActive={setIsActive} />}
+							element={
+								<SignIn setIsActive={setIsActive} setIsAdmin={setIsAdmin} />
+							}
 						/>
 						<Route
 							path='signUp'
 							element={<SignUp setIsActive={setIsActive} />}
 						/>
 					</Route>
-				) : !IsAdmin ? (
+				) : isAdmin ? (
+					<Route
+						path='/'
+						element={
+							<MainAdmin setIsActive={setIsActive} setIsAdmin={setIsAdmin} />
+						}>
+						<Route index element={<Blog />} />
+						<Route path='/adminPanel' element={<AdminPanel />} />
+					</Route>
+				) : (
 					<Route path='/' element={<MainReg setIsActive={setIsActive} />}>
 						<Route index element={<Blog />} />
 						<Route path='profile' element={<Profile />} />
-					</Route>
-				) : (
-					<Route path='/' element={<MainAdmin />}>
-						<Route index element={<Blog />} />
 					</Route>
 				)}
 
@@ -56,5 +66,4 @@ function App() {
 		</>
 	);
 }
-
 export default App;

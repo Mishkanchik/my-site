@@ -2,10 +2,10 @@ import { Outlet } from "react-router";
 
 import HeaderAdmin from "../../../components/layout/adminHeaderLayoutRegister/HeaderAdmin";
 
-const MainNoReg = () => {
+const MainNoReg = ({ setIsActive, setIsAdmin }) => {
 	return (
 		<>
-			<HeaderAdmin />
+			<HeaderAdmin setIsActive={setIsActive} setIsAdmin={setIsAdmin} />
 			<Outlet />
 		</>
 	);
