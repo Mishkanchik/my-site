@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 
 const Profile = () => {
-	const defaultAvatar = "https://via.placeholder.com/100"; // Стандартна аватарка
+	const defaultAvatar = "https://via.placeholder.com/100";
 
 	const [user, setUser] = useState({
 		fullName: "",
@@ -36,14 +36,20 @@ const Profile = () => {
 		const updatedUser = { ...user, ...updatedFields };
 		setUser(updatedUser);
 		localStorage.setItem("user", JSON.stringify(updatedUser));
-		window.dispatchEvent(new Event("userUpdated")); // Подія для оновлення аватарки в іншому компоненті
+		const users = localStorage.getItem("users");
+		const usersParse = JSON.parse(users);
+		const index = usersParse.findIndex((u) => u.email === user.email);
+		console.log(index);
+		usersParse[index] = { ...usersParse[index], ...updatedFields };
+		console.log(usersParse);
+		localStorage.setItem("users", JSON.stringify(usersParse));
+
+		window.dispatchEvent(new Event("userUpdated"));
 	};
 
 	const handleAvatarChange = () => {
-		if (newAvatarUrl) {
-			updateUser({ avatar: newAvatarUrl });
-			setNewAvatarUrl("");
-		}
+		console.log(newAvatarUrl);
+		updateUser({ avatar: newAvatarUrl });
 	};
 
 	const handlePasswordChange = () => {

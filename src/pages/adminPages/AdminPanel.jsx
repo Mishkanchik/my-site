@@ -81,8 +81,8 @@ const AdminPanel = () => {
 	};
 
 	// Видалення користувача
-	const handleDeleteUser = (id) => {
-		const updatedUsers = users.filter((user) => user.id !== id);
+	const handleDeleteUser = (email) => {
+		const updatedUsers = users.filter((user) => user.email !== email);
 		setUsers(updatedUsers);
 		saveUsersToLocalStorage(updatedUsers);
 	};
@@ -90,7 +90,7 @@ const AdminPanel = () => {
 	// Редагування користувача
 	const handleEditUser = () => {
 		const updatedUsers = users.map((user) =>
-			user.id === editUser.id ? editUser : user
+			user.email === editUser.email ? editUser : user
 		);
 		setUsers(updatedUsers);
 		saveUsersToLocalStorage(updatedUsers);
@@ -111,7 +111,7 @@ const AdminPanel = () => {
 
 				<Grid container spacing={2}>
 					{users.map((user) => (
-						<Grid item xs={12} md={6} lg={4} key={user.id}>
+						<Grid item xs={12} md={6} lg={4} key={user.email}>
 							<Paper
 								sx={{ padding: "16px", backgroundColor: "background.paper" }}>
 								<Box display='flex' alignItems='center' gap={2}>
@@ -141,7 +141,7 @@ const AdminPanel = () => {
 									<Tooltip title='Delete'>
 										<IconButton
 											color='error'
-											onClick={() => handleDeleteUser(user.id)}>
+											onClick={() => handleDeleteUser(user.email)}>
 											<DeleteIcon />
 										</IconButton>
 									</Tooltip>

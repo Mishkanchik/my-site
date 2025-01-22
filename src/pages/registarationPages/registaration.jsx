@@ -61,6 +61,7 @@ export default function SignUp({ setIsActive }) {
 				email: values.email,
 				password: values.password,
 				isActive: true,
+				avatar: "",
 			};
 
 			const updatedUsers = JSON.parse(localStorage.getItem("users"));

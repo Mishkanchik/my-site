@@ -82,9 +82,7 @@ export default function SignIn({ setIsActive, setIsAdmin }) {
 		if (user) {
 			const existingUser = JSON.parse(localStorage.getItem("user")) || {};
 
-			const avatar = existingUser.avatar || null;
-
-			const updatedUser = { ...existingUser, ...user, avatar, isActive: true };
+			const updatedUser = { ...existingUser, ...user, isActive: true };
 
 			localStorage.setItem("user", JSON.stringify(updatedUser));
 			setIsActive(true);

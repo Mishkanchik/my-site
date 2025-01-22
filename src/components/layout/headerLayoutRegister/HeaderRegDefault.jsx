@@ -19,7 +19,7 @@ const settings = ["Profile", "Logout"];
 function HeaderMainReg({ setIsActive }) {
 	const navigate = useNavigate();
 	const [anchorElUser, setAnchorElUser] = React.useState(null);
-	const [avatar, setAvatar] = React.useState("https://via.placeholder.com/100"); // Дефолтна аватарка
+	const [avatar, setAvatar] = React.useState("https://via.placeholder.com/100");
 
 	React.useEffect(() => {
 		const savedUser = JSON.parse(localStorage.getItem("user"));
