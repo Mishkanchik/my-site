@@ -50,12 +50,6 @@ export default function SignUp({ setIsActive }) {
 
 	const formSubmit = (values) => {
 		try {
-			const existingUsers = JSON.parse(localStorage.getItem("users"));
-
-			if (!existingUsers) {
-				localStorage.setItem("users", JSON.stringify([]));
-			}
-
 			const newUser = {
 				fullName: values.fullName,
 				email: values.email,
@@ -63,7 +57,7 @@ export default function SignUp({ setIsActive }) {
 				isActive: true,
 				avatar: "",
 			};
-
+			localStorage.setItem("user", JSON.stringify(newUser));
 			const updatedUsers = JSON.parse(localStorage.getItem("users"));
 			updatedUsers.push(newUser);
 
