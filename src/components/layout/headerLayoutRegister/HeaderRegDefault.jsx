@@ -19,7 +19,9 @@ const settings = ["Profile", "Logout"];
 function HeaderMainReg({ setIsActive }) {
 	const navigate = useNavigate();
 	const [anchorElUser, setAnchorElUser] = React.useState(null);
-	const [avatar, setAvatar] = React.useState("https://via.placeholder.com/100");
+	const [avatar, setAvatar] = React.useState(
+		"https://pngcore.com/files/preview/960x960/11694532441f7xttwthhk686wgcagm71b84znfjy39usdvu0yrjfvlxflwlhmgbus0szosphh85sfhz9mkj6rorpkf9aozsmwxxfwg1chfkmzez.png"
+	);
 
 	React.useEffect(() => {
 		const savedUser = JSON.parse(localStorage.getItem("user"));
@@ -29,7 +31,10 @@ function HeaderMainReg({ setIsActive }) {
 
 		const updateAvatar = () => {
 			const updatedUser = JSON.parse(localStorage.getItem("user"));
-			setAvatar(updatedUser?.avatar || "https://via.placeholder.com/100");
+			setAvatar(
+				updatedUser?.avatar ||
+					"https://pngcore.com/files/preview/960x960/11694532441f7xttwthhk686wgcagm71b84znfjy39usdvu0yrjfvlxflwlhmgbus0szosphh85sfhz9mkj6rorpkf9aozsmwxxfwg1chfkmzez.png"
+			);
 		};
 
 		window.addEventListener("userUpdated", updateAvatar);

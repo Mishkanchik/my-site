@@ -14,7 +14,7 @@ import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { useNavigate } from "react-router";
 
-const settings = ["Profile", "Admin Panel", "Logout"];
+const settings = ["Admin Panel", "Logout"];
 
 function HeaderAdmin({ setIsActive, setIsAdmin }) {
 	const navigate = useNavigate();
@@ -31,9 +31,6 @@ function HeaderAdmin({ setIsActive, setIsAdmin }) {
 	const user = JSON.parse(localStorage.getItem("user"));
 	const handleSettingClick = (setting) => {
 		switch (setting) {
-			case "Profile":
-				navigate("/profile");
-				break;
 			case "Admin Panel":
 				navigate("/adminPanel");
 				break;
@@ -85,7 +82,10 @@ function HeaderAdmin({ setIsActive, setIsAdmin }) {
 					<Box sx={{ flexGrow: 0 }}>
 						<Tooltip title='Open settings'>
 							<IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-								<Avatar alt='Remy Sharp' src='/static/images/avatar/2.jpg' />
+								<Avatar
+									alt='Remy Sharp'
+									src='https://pngcore.com/files/preview/960x960/11694532441f7xttwthhk686wgcagm71b84znfjy39usdvu0yrjfvlxflwlhmgbus0szosphh85sfhz9mkj6rorpkf9aozsmwxxfwg1chfkmzez.png'
+								/>
 							</IconButton>
 						</Tooltip>
 						<Menu

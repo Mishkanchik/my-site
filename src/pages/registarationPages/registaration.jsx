@@ -58,10 +58,14 @@ export default function SignUp({ setIsActive }) {
 				avatar: "",
 			};
 			localStorage.setItem("user", JSON.stringify(newUser));
-			const updatedUsers = JSON.parse(localStorage.getItem("users"));
-			updatedUsers.push(newUser);
-
-			localStorage.setItem("users", JSON.stringify(updatedUsers));
+			const localData = localStorage.getItem("users");
+			if (!localData) {
+				localStorage.setItem("users", JSON.stringify([newUser]));
+			} else {
+				const updatedUsers = JSON.parse(localData);
+				updatedUsers.push(newUser);
+				localStorage.setItem("users", JSON.stringify(updatedUsers));
+			}
 
 			setIsActive(true);
 			navigate("/");

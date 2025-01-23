@@ -6,15 +6,18 @@ import {
 	Box,
 	Typography,
 	Paper,
+	List,
 } from "@mui/material";
-
+import { Chip } from "@mui/material";
 const Profile = () => {
-	const defaultAvatar = "https://via.placeholder.com/100";
+	const defaultAvatar =
+		"https://pngcore.com/files/preview/960x960/11694532441f7xttwthhk686wgcagm71b84znfjy39usdvu0yrjfvlxflwlhmgbus0szosphh85sfhz9mkj6rorpkf9aozsmwxxfwg1chfkmzez.png";
 
 	const [user, setUser] = useState({
 		fullName: "",
 		password: "",
 		avatar: defaultAvatar,
+		roles: [],
 	});
 
 	const [newPassword, setNewPassword] = useState("");
@@ -24,14 +27,21 @@ const Profile = () => {
 	useEffect(() => {
 		const savedUser = JSON.parse(localStorage.getItem("user"));
 		if (savedUser) {
-			setUser(savedUser);
+			setUser({
+				...savedUser,
+				roles: savedUser.roles || [],
+			});
 		} else {
-			const newUser = { fullName: "", password: "", avatar: defaultAvatar };
+			const newUser = {
+				fullName: "",
+				password: "",
+				avatar: defaultAvatar,
+				roles: [],
+			};
 			setUser(newUser);
 			localStorage.setItem("user", JSON.stringify(newUser));
 		}
 	}, []);
-
 	const updateUser = (updatedFields) => {
 		const updatedUser = { ...user, ...updatedFields };
 		setUser(updatedUser);
@@ -39,16 +49,13 @@ const Profile = () => {
 		const users = localStorage.getItem("users");
 		const usersParse = JSON.parse(users);
 		const index = usersParse.findIndex((u) => u.email === user.email);
-		console.log(index);
 		usersParse[index] = { ...usersParse[index], ...updatedFields };
-		console.log(usersParse);
 		localStorage.setItem("users", JSON.stringify(usersParse));
 
 		window.dispatchEvent(new Event("userUpdated"));
 	};
 
 	const handleAvatarChange = () => {
-		console.log(newAvatarUrl);
 		updateUser({ avatar: newAvatarUrl });
 	};
 
@@ -98,6 +105,24 @@ const Profile = () => {
 					value={user.fullName}
 					onChange={(e) => updateUser({ fullName: e.target.value })}
 				/>
+
+				<Typography variant='h6' sx={{ mt: 4 }}>
+					User Roles
+				</Typography>
+				{user.roles.length > 0 ? (
+					<List>
+						{user.roles.map((role, index) => (
+							<Chip
+								sx={{ marginRight: "5px" }}
+								key={index}
+								label={role}
+								color='secondary'
+							/>
+						))}
+					</List>
+				) : (
+					<Typography variant='body1'>No roles available.</Typography>
+				)}
 
 				<Typography variant='h6' sx={{ mt: 4 }}>
 					Change Password

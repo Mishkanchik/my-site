@@ -20,6 +20,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import { Chip } from "@mui/material";
 
 const darkTheme = createTheme({
 	palette: {
@@ -43,27 +44,31 @@ const darkTheme = createTheme({
 const AdminPanel = () => {
 	const [users, setUsers] = useState([]);
 	const [isAdding, setIsAdding] = useState(false);
+	const [roleInput, setRoleInput] = useState("");
+	const [editUser, setEditUser] = useState(null);
 	const [newUser, setNewUser] = useState({
 		fullName: "",
 		email: "",
 		password: "",
 		isActive: false,
 		avatar: "",
+		roles: [],
 	});
-	const [editUser, setEditUser] = useState(null);
 
-	// Завантаження користувачів з локального сховища
 	useEffect(() => {
-		const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+		const storedUsers = (JSON.parse(localStorage.getItem("users")) || []).map(
+			(user) => ({
+				...user,
+				roles: user.roles || [],
+			})
+		);
 		setUsers(storedUsers);
 	}, []);
 
-	// Збереження користувачів у локальному сховищі
 	const saveUsersToLocalStorage = (updatedUsers) => {
 		localStorage.setItem("users", JSON.stringify(updatedUsers));
 	};
 
-	// Додавання нового користувача
 	const handleAddUser = () => {
 		if (newUser.fullName && newUser.email && newUser.password) {
 			const updatedUsers = [...users, { ...newUser, id: Date.now() }];
@@ -75,19 +80,33 @@ const AdminPanel = () => {
 				password: "",
 				isActive: false,
 				avatar: "",
+				roles: [],
 			});
 			setIsAdding(false);
 		}
 	};
 
-	// Видалення користувача
 	const handleDeleteUser = (email) => {
 		const updatedUsers = users.filter((user) => user.email !== email);
 		setUsers(updatedUsers);
 		saveUsersToLocalStorage(updatedUsers);
 	};
+	const handleAddRole = () => {
+		if (roleInput.trim() && !editUser.roles.includes(roleInput.trim())) {
+			setEditUser({
+				...editUser,
+				roles: [...editUser.roles, roleInput.trim()],
+			});
+			setRoleInput("");
+		}
+	};
+	const handleDeleteRole = (role) => {
+		setEditUser({
+			...editUser,
+			roles: editUser.roles.filter((r) => r !== role),
+		});
+	};
 
-	// Редагування користувача
 	const handleEditUser = () => {
 		const updatedUsers = users.map((user) =>
 			user.email === editUser.email ? editUser : user
@@ -128,6 +147,20 @@ const AdminPanel = () => {
 										<Typography variant='body2' color='text.secondary'>
 											Password: {user.password}
 										</Typography>
+										{/* Додаємо відображення ролей */}
+										<Box marginTop={1} display='flex'>
+											{user.roles && user.roles.length > 0 ? (
+												<Box display='flex' flexWrap='wrap' gap={1}>
+													{user.roles.map((role, index) => (
+														<Chip key={index} label={role} color='primary' />
+													))}
+												</Box>
+											) : (
+												<Typography variant='body2' color='text.secondary'>
+													No roles assigned
+												</Typography>
+											)}
+										</Box>
 									</Box>
 								</Box>
 								<Box display='flex' justifyContent='flex-end' marginTop={2}>
@@ -151,7 +184,6 @@ const AdminPanel = () => {
 					))}
 				</Grid>
 
-				{/* Діалогове вікно додавання користувача */}
 				{isAdding && (
 					<Dialog open={isAdding} onClose={() => setIsAdding(false)}>
 						<DialogTitle>Add New User</DialogTitle>
@@ -197,7 +229,6 @@ const AdminPanel = () => {
 					</Dialog>
 				)}
 
-				{/* Діалогове вікно редагування користувача */}
 				{editUser && (
 					<Dialog open={!!editUser} onClose={() => setEditUser(null)}>
 						<DialogTitle>Edit User</DialogTitle>
@@ -230,6 +261,38 @@ const AdminPanel = () => {
 									setEditUser({ ...editUser, password: e.target.value })
 								}
 							/>
+
+							<Box mt={2}>
+								<Typography variant='subtitle1'>Roles:</Typography>
+								<Box display='flex' flexWrap='wrap' gap={1} mt={1}>
+									{(editUser.roles || []).map((role, index) => (
+										<Chip
+											key={index}
+											label={role}
+											onDelete={() => handleDeleteRole(role)}
+											color='secondary'
+										/>
+									))}
+								</Box>
+								<Box display='flex' alignItems='center' gap={1} mt={2}>
+									<TextField
+										fullWidth
+										margin='dense'
+										label='Add Role'
+										value={roleInput}
+										onChange={(e) => setRoleInput(e.target.value)}
+										onKeyPress={(e) => {
+											if (e.key === "Enter") handleAddRole();
+										}}
+									/>
+									<IconButton
+										color='primary'
+										onClick={handleAddRole}
+										disabled={!roleInput.trim()}>
+										<AddIcon />
+									</IconButton>
+								</Box>
+							</Box>
 						</DialogContent>
 						<DialogActions>
 							<Button onClick={() => setEditUser(null)}>Cancel</Button>
