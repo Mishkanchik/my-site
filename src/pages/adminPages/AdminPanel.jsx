@@ -147,7 +147,7 @@ const AdminPanel = () => {
 										<Typography variant='body2' color='text.secondary'>
 											Password: {user.password}
 										</Typography>
-										{/* Додаємо відображення ролей */}
+									
 										<Box marginTop={1} display='flex'>
 											{user.roles && user.roles.length > 0 ? (
 												<Box display='flex' flexWrap='wrap' gap={1}>
