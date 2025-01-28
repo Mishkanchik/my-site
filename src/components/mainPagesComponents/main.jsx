@@ -17,7 +17,7 @@ function Blog(props) {
 	const [filteredNews, setFilteredNews] = useState([]);
 	const [totalPages, setTotalPages] = useState(1);
 
-	useEffect(() => {
+	useEffect(() => {	
 		const fetchNews = async () => {
 			try {
 				const response = await axios.get("https://newsapi.org/v2/everything", {
@@ -36,6 +36,8 @@ function Blog(props) {
 			}
 		};
 		fetchNews();
+		window.scrollTo(0,0);
+		
 	}, [page, searchTerm]);
 
 	const handleSearch = (searchTerm) => {
@@ -45,6 +47,7 @@ function Blog(props) {
 
 	const handlePageChange = (event, value) => {
 		setPage(value);
+		
 	};
 
 	return (

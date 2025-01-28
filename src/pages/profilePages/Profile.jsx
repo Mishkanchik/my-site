@@ -22,10 +22,14 @@ const Profile = () => {
 
 	const [newPassword, setNewPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
+	const [oldPassword, setOldPassword] = useState("");
 	const [newAvatarUrl, setNewAvatarUrl] = useState("");
 
+
+	const savedUser = JSON.parse(localStorage.getItem("user"));
+	
 	useEffect(() => {
-		const savedUser = JSON.parse(localStorage.getItem("user"));
+	
 		if (savedUser) {
 			setUser({
 				...savedUser,
@@ -60,10 +64,11 @@ const Profile = () => {
 	};
 
 	const handlePasswordChange = () => {
-		if (newPassword && newPassword === confirmPassword) {
+		if (oldPassword === user.password && newPassword && newPassword === confirmPassword ) {
 			updateUser({ password: newPassword });
 			setNewPassword("");
 			setConfirmPassword("");
+			setOldPassword("");
 		} else {
 			alert("Passwords do not match!");
 		}
@@ -127,6 +132,15 @@ const Profile = () => {
 				<Typography variant='h6' sx={{ mt: 4 }}>
 					Change Password
 				</Typography>
+				<TextField
+					label='Old Password'
+					variant='outlined'
+					type='password'
+					fullWidth
+					margin='normal'
+					value={oldPassword}
+					onChange={(e) => setOldPassword(e.target.value)}
+				/>
 				<TextField
 					label='New Password'
 					variant='outlined'
