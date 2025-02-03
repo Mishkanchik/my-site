@@ -1,25 +1,20 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { ADD_ROLE, REMOVE_ROLE, SET_ROLES } from "./rolesAction.js";
 
 const initialState = {
-  roles: JSON.parse(localStorage.getItem("roles")) || [],
+	roles: [],
 };
 
-const rolesSlice = createSlice({
-  name: "roles",
-  initialState,
-  reducers: {
-    addRole: (state, action) => {
-      if (!state.roles.includes(action.payload)) {
-        state.roles.push(action.payload);
-        localStorage.setItem("roles", JSON.stringify(state.roles));
-      }
-    },
-    removeRole: (state, action) => {
-      state.roles = state.roles.filter((role) => role !== action.payload);
-      localStorage.setItem("roles", JSON.stringify(state.roles));
-    },
-  },
-});
+const roleReducer = (state = initialState, action) => {
+	switch (action.type) {
+		case SET_ROLES:
+			return { ...state, roles: action.payload };
+		case ADD_ROLE:
+			return { ...state, roles: [...state.roles, action.payload] };
+		case REMOVE_ROLE:
+			return { ...state, roles: state.roles.filter((role) => role !== action.payload) };
+		default:
+			return state;
+	}
+};
 
-export const { addRole, removeRole } = rolesSlice.actions;
-export default rolesSlice.reducer;
+export default roleReducer;

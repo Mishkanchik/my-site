@@ -14,37 +14,32 @@ import {
 	Tooltip,
 	Grid,
 	Paper,
+	Chip,
 	createTheme,
 	ThemeProvider,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import { Chip } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import {
+	addRole,
+	removeRole,
+} from "../../store/reducers/rolesReducer/rolesAction";
 
 const darkTheme = createTheme({
 	palette: {
 		mode: "dark",
-		primary: {
-			main: "#90caf9",
-		},
-		secondary: {
-			main: "#f48fb1",
-		},
-		background: {
-			default: "#121212",
-			paper: "#1e1e1e",
-		},
+		primary: { main: "#90caf9" },
+		secondary: { main: "#f48fb1" },
+		background: { default: "#121212", paper: "#1e1e1e" },
 	},
-	typography: {
-		fontFamily: "Roboto, sans-serif",
-	},
+	typography: { fontFamily: "Roboto, sans-serif" },
 });
 
 const AdminPanel = () => {
 	const [users, setUsers] = useState([]);
 	const [isAdding, setIsAdding] = useState(false);
-	const [roleInput, setRoleInput] = useState("");
 	const [editUser, setEditUser] = useState(null);
 	const [newUser, setNewUser] = useState({
 		fullName: "",
@@ -52,16 +47,26 @@ const AdminPanel = () => {
 		password: "",
 		isActive: false,
 		avatar: "",
-		roles: [],
 	});
+	const [confirmDelete, setConfirmDelete] = useState(null);
+
+	const handleConfirmDelete = (user) => {
+		setConfirmDelete(user);
+	};
+
+	const handleDeleteConfirmed = () => {
+		if (confirmDelete) {
+			handleDeleteUser(confirmDelete.email);
+			setConfirmDelete(null);
+		}
+	};
+
+	const dispatch = useDispatch();
+	const roles = useSelector((state) => state.roles.roles) || [];
+	const [roleInput, setRoleInput] = useState("");
 
 	useEffect(() => {
-		const storedUsers = (JSON.parse(localStorage.getItem("users")) || []).map(
-			(user) => ({
-				...user,
-				roles: user.roles || [],
-			})
-		);
+		const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
 		setUsers(storedUsers);
 	}, []);
 
@@ -80,7 +85,6 @@ const AdminPanel = () => {
 				password: "",
 				isActive: false,
 				avatar: "",
-				roles: [],
 			});
 			setIsAdding(false);
 		}
@@ -91,29 +95,16 @@ const AdminPanel = () => {
 		setUsers(updatedUsers);
 		saveUsersToLocalStorage(updatedUsers);
 	};
-	const handleAddRole = () => {
-		if (roleInput.trim() && !editUser.roles.includes(roleInput.trim())) {
-			setEditUser({
-				...editUser,
-				roles: [...editUser.roles, roleInput.trim()],
-			});
-			setRoleInput("");
-		}
-	};
-	const handleDeleteRole = (role) => {
-		setEditUser({
-			...editUser,
-			roles: editUser.roles.filter((r) => r !== role),
-		});
-	};
 
 	const handleEditUser = () => {
-		const updatedUsers = users.map((user) =>
-			user.email === editUser.email ? editUser : user
-		);
-		setUsers(updatedUsers);
-		saveUsersToLocalStorage(updatedUsers);
-		setEditUser(null);
+		if (editUser) {
+			const updatedUsers = users.map((user) =>
+				user.email === editUser.email ? editUser : user
+			);
+			setUsers(updatedUsers);
+			saveUsersToLocalStorage(updatedUsers);
+			setEditUser(null);
+		}
 	};
 
 	return (
@@ -147,20 +138,6 @@ const AdminPanel = () => {
 										<Typography variant='body2' color='text.secondary'>
 											Password: {user.password}
 										</Typography>
-									
-										<Box marginTop={1} display='flex'>
-											{user.roles && user.roles.length > 0 ? (
-												<Box display='flex' flexWrap='wrap' gap={1}>
-													{user.roles.map((role, index) => (
-														<Chip key={index} label={role} color='primary' />
-													))}
-												</Box>
-											) : (
-												<Typography variant='body2' color='text.secondary'>
-													No roles assigned
-												</Typography>
-											)}
-										</Box>
 									</Box>
 								</Box>
 								<Box display='flex' justifyContent='flex-end' marginTop={2}>
@@ -174,7 +151,7 @@ const AdminPanel = () => {
 									<Tooltip title='Delete'>
 										<IconButton
 											color='error'
-											onClick={() => handleDeleteUser(user.email)}>
+											onClick={() => handleConfirmDelete(user)}>
 											<DeleteIcon />
 										</IconButton>
 									</Tooltip>
@@ -183,7 +160,70 @@ const AdminPanel = () => {
 						</Grid>
 					))}
 				</Grid>
+				<Dialog open={!!confirmDelete} onClose={() => setConfirmDelete(null)}>
+					<DialogTitle>Підтвердження видалення</DialogTitle>
+					<DialogContent>
+						<Typography>
+							Ви впевнені, що хочете видалити {confirmDelete?.fullName}?
+						</Typography>
+					</DialogContent>
+					<DialogActions>
+						<Button onClick={() => setConfirmDelete(null)} color='primary'>
+							Скасувати
+						</Button>
+						<Button
+							onClick={handleDeleteConfirmed}
+							variant='contained'
+							color='error'>
+							Видалити
+						</Button>
+					</DialogActions>
+				</Dialog>
 
+				{editUser && (
+					<Dialog open={!!editUser} onClose={() => setEditUser(null)}>
+						<DialogTitle>Edit User</DialogTitle>
+						<DialogContent>
+							<TextField
+								fullWidth
+								margin='dense'
+								label='Full Name'
+								value={editUser.fullName}
+								onChange={(e) =>
+									setEditUser({ ...editUser, fullName: e.target.value })
+								}
+							/>
+							<TextField
+								fullWidth
+								margin='dense'
+								label='Email'
+								value={editUser.email}
+								onChange={(e) =>
+									setEditUser({ ...editUser, email: e.target.value })
+								}
+							/>
+							<TextField
+								fullWidth
+								margin='dense'
+								label='Password'
+								type='password'
+								value={editUser.password}
+								onChange={(e) =>
+									setEditUser({ ...editUser, password: e.target.value })
+								}
+							/>
+						</DialogContent>
+						<DialogActions>
+							<Button onClick={() => setEditUser(null)}>Cancel</Button>
+							<Button
+								onClick={handleEditUser}
+								variant='contained'
+								color='primary'>
+								Save
+							</Button>
+						</DialogActions>
+					</Dialog>
+				)}
 				{isAdding && (
 					<Dialog open={isAdding} onClose={() => setIsAdding(false)}>
 						<DialogTitle>Add New User</DialogTitle>
@@ -229,82 +269,45 @@ const AdminPanel = () => {
 					</Dialog>
 				)}
 
-				{editUser && (
-					<Dialog open={!!editUser} onClose={() => setEditUser(null)}>
-						<DialogTitle>Edit User</DialogTitle>
-						<DialogContent>
-							<TextField
-								fullWidth
-								margin='dense'
-								label='Full Name'
-								value={editUser.fullName}
-								onChange={(e) =>
-									setEditUser({ ...editUser, fullName: e.target.value })
+				<Box mt={4} p={2} bgcolor='background.paper'>
+					<Typography variant='h6'>Roles Management</Typography>
+					<Box display='flex' alignItems='center' gap={1} mt={2}>
+						<TextField
+							fullWidth
+							margin='dense'
+							label='Add Role'
+							value={roleInput}
+							onChange={(e) => setRoleInput(e.target.value)}
+						/>
+						<IconButton
+							color='primary'
+							onClick={() => {
+								if (roleInput.trim()) {
+									dispatch(addRole(roleInput.trim()));
+									setRoleInput("");
 								}
-							/>
-							<TextField
-								fullWidth
-								margin='dense'
-								label='Email'
-								value={editUser.email}
-								onChange={(e) =>
-									setEditUser({ ...editUser, email: e.target.value })
-								}
-							/>
-							<TextField
-								fullWidth
-								margin='dense'
-								label='Password'
-								type='password'
-								value={editUser.password}
-								onChange={(e) =>
-									setEditUser({ ...editUser, password: e.target.value })
-								}
-							/>
+							}}>
+							<AddIcon />
+						</IconButton>
+					</Box>
 
-							<Box mt={2}>
-								<Typography variant='subtitle1'>Roles:</Typography>
-								<Box display='flex' flexWrap='wrap' gap={1} mt={1}>
-									{(editUser.roles || []).map((role, index) => (
-										<Chip
-											key={index}
-											label={role}
-											onDelete={() => handleDeleteRole(role)}
-											color='secondary'
-										/>
-									))}
-								</Box>
-								<Box display='flex' alignItems='center' gap={1} mt={2}>
-									<TextField
-										fullWidth
-										margin='dense'
-										label='Add Role'
-										value={roleInput}
-										onChange={(e) => setRoleInput(e.target.value)}
-										onKeyPress={(e) => {
-											if (e.key === "Enter") handleAddRole();
-										}}
-									/>
-									<IconButton
-										color='primary'
-										onClick={handleAddRole}
-										disabled={!roleInput.trim()}>
-										<AddIcon />
-									</IconButton>
-								</Box>
-							</Box>
-						</DialogContent>
-						<DialogActions>
-							<Button onClick={() => setEditUser(null)}>Cancel</Button>
-							<Button
-								onClick={handleEditUser}
-								variant='contained'
-								color='primary'>
-								Save
-							</Button>
-						</DialogActions>
-					</Dialog>
-				)}
+					<Box mt={2} display='flex' flexWrap='wrap' gap={1}>
+						{roles.length > 0 ? (
+							roles.map((role, index) => (
+								<Chip
+									key={index}
+									label={role}
+									onDelete={() => dispatch(removeRole(role))}
+									color='secondary'
+								/>
+							))
+						) : (
+							<Typography variant='body2' color='text.secondary'>
+								No roles available
+							</Typography>
+						)}
+					</Box>
+				</Box>
 
 				<Fab
 					color='secondary'

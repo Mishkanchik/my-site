@@ -11,7 +11,8 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { styled } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
-
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 const SignInContainer = styled(Box)(({ theme }) => ({
 	height: "100vh",
 	padding: theme.spacing(2),
@@ -51,6 +52,27 @@ const validationSchema = Yup.object({
 export default function SignIn({ setIsActive, setIsAdmin }) {
 	const navigate = useNavigate();
 	const [errorMessage, setErrorMessage] = React.useState("");
+
+	const handleGoogleSuccess = (response) => {
+		const userData = jwtDecode(response.credential);
+
+		const user = {
+			email: userData.email,
+			avatar: userData.picture,
+			isActive: true,
+			isAdmin: false,
+		};
+
+		localStorage.setItem("user", JSON.stringify(user));
+
+		setIsActive(true);
+		setIsAdmin(false);
+		navigate("/");
+	};
+
+	const handleGoogleFailure = () => {
+		setErrorMessage("Google sign-in failed. Please try again.");
+	};
 
 	const formSubmit = (values) => {
 		const users = localStorage.getItem("users");
@@ -93,6 +115,14 @@ export default function SignIn({ setIsActive, setIsAdmin }) {
 		}
 	};
 
+	React.useEffect(() => {
+		const storedUser = JSON.parse(localStorage.getItem("user"));
+		if (storedUser) {
+			setIsActive(storedUser.isActive);
+			setIsAdmin(storedUser.isAdmin);
+		}
+	}, []);
+
 	const formik = useFormik({
 		initialValues: {
 			email: "",
@@ -104,51 +134,60 @@ export default function SignIn({ setIsActive, setIsAdmin }) {
 
 	return (
 		<>
-			<CssBaseline />
-			<SignInContainer>
-				<Card>
-					<Typography component='h1' variant='h4' align='center'>
-						Sign in
-					</Typography>
-					{errorMessage && <Alert severity='error'>{errorMessage}</Alert>}
-					<Box
-						component='form'
-						onSubmit={formik.handleSubmit}
-						sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-						<TextField
-							label='Email'
-							name='email'
-							type='email'
-							fullWidth
-							onChange={formik.handleChange}
-							value={formik.values.email}
-							onBlur={formik.handleBlur}
-							error={formik.touched.email && Boolean(formik.errors.email)}
-							helperText={formik.touched.email && formik.errors.email}
-						/>
-						<TextField
-							label='Password'
-							name='password'
-							type='password'
-							fullWidth
-							onChange={formik.handleChange}
-							value={formik.values.password}
-							onBlur={formik.handleBlur}
-							error={formik.touched.password && Boolean(formik.errors.password)}
-							helperText={formik.touched.password && formik.errors.password}
-						/>
-						<Button type='submit' fullWidth variant='contained'>
+			<GoogleOAuthProvider clientId='808196513552-tvtdtl6qi6n0gjlq2ophnp1hhlbai13k.apps.googleusercontent.com'>
+				<CssBaseline />
+				<SignInContainer>
+					<Card>
+						<Typography component='h1' variant='h4' align='center'>
 							Sign in
-						</Button>
-						<Button
-							fullWidth
-							variant='outlined'
-							onClick={() => navigate("/signUp")}>
-							Don&apos;t have an account? Sign up
-						</Button>
-					</Box>
-				</Card>
-			</SignInContainer>
+						</Typography>
+						{errorMessage && <Alert severity='error'>{errorMessage}</Alert>}
+						<Box
+							component='form'
+							onSubmit={formik.handleSubmit}
+							sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+							<TextField
+								label='Email'
+								name='email'
+								type='email'
+								fullWidth
+								onChange={formik.handleChange}
+								value={formik.values.email}
+								onBlur={formik.handleBlur}
+								error={formik.touched.email && Boolean(formik.errors.email)}
+								helperText={formik.touched.email && formik.errors.email}
+							/>
+							<TextField
+								label='Password'
+								name='password'
+								type='password'
+								fullWidth
+								onChange={formik.handleChange}
+								value={formik.values.password}
+								onBlur={formik.handleBlur}
+								error={
+									formik.touched.password && Boolean(formik.errors.password)
+								}
+								helperText={formik.touched.password && formik.errors.password}
+							/>
+							<Button type='submit' fullWidth variant='contained'>
+								Sign in
+							</Button>
+							<Button
+								fullWidth
+								variant='outlined'
+								onClick={() => navigate("/signUp")}>
+								Don&apos;t have an account? Sign up
+							</Button>
+
+							<GoogleLogin
+								onSuccess={handleGoogleSuccess}
+								onError={handleGoogleFailure}
+							/>
+						</Box>
+					</Card>
+				</SignInContainer>
+			</GoogleOAuthProvider>
 		</>
 	);
 }

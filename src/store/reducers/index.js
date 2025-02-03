@@ -1,5 +1,5 @@
 import {combineReducers} from "@reduxjs/toolkit";
-import rolesSlice from "../reducers/rolesReducer/index"
+import roleReducer from "./rolesReducer"
 export const rootReducer = combineReducers({
-    roles: rolesSlice
+    roles: roleReducer
 })

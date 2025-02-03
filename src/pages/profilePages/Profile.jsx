@@ -6,9 +6,8 @@ import {
 	Box,
 	Typography,
 	Paper,
-	List,
 } from "@mui/material";
-import { Chip } from "@mui/material";
+
 const Profile = () => {
 	const defaultAvatar =
 		"https://pngcore.com/files/preview/960x960/11694532441f7xttwthhk686wgcagm71b84znfjy39usdvu0yrjfvlxflwlhmgbus0szosphh85sfhz9mkj6rorpkf9aozsmwxxfwg1chfkmzez.png";
@@ -17,7 +16,6 @@ const Profile = () => {
 		fullName: "",
 		password: "",
 		avatar: defaultAvatar,
-		roles: [],
 	});
 
 	const [newPassword, setNewPassword] = useState("");
@@ -26,39 +24,35 @@ const Profile = () => {
 	const [newAvatarUrl, setNewAvatarUrl] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
 
-	const savedUser = JSON.parse(localStorage.getItem("user"));
-
 	useEffect(() => {
+		const savedUser = JSON.parse(localStorage.getItem("user"));
 		if (savedUser) {
-			setUser({
-				...savedUser,
-				roles: savedUser.roles || [],
-			});
-		} else {
-			const newUser = {
-				fullName: "",
-				password: "",
-				avatar: defaultAvatar,
-				roles: [],
-			};
-			setUser(newUser);
-			localStorage.setItem("user", JSON.stringify(newUser));
+			setUser(savedUser);
 		}
 	}, []);
 
 	const updateUser = (updatedFields) => {
-		const updatedUser = { ...user, ...updatedFields };
-		setUser(updatedUser);
-		localStorage.setItem("user", JSON.stringify(updatedUser));
-		const users = JSON.parse(localStorage.getItem("users"));
-		const index = users.findIndex((u) => u.email === user.email);
-		users[index] = { ...users[index], ...updatedFields };
-		localStorage.setItem("users", JSON.stringify(users));
-		window.dispatchEvent(new Event("userUpdated"));
+		setUser((prevUser) => {
+			const updatedUser = { ...prevUser, ...updatedFields };
+			localStorage.setItem("user", JSON.stringify(updatedUser));
+
+			const users = JSON.parse(localStorage.getItem("users")) || [];
+			const index = users.findIndex((u) => u.email === prevUser.email);
+			if (index !== -1) {
+				users[index] = { ...users[index], ...updatedFields };
+				localStorage.setItem("users", JSON.stringify(users));
+			}
+
+			window.dispatchEvent(new Event("userUpdated"));
+			return updatedUser;
+		});
 	};
 
 	const handleAvatarChange = () => {
-		updateUser({ avatar: newAvatarUrl });
+		if (newAvatarUrl.trim() !== "") {
+			updateUser({ avatar: newAvatarUrl });
+			setNewAvatarUrl("");
+		}
 	};
 
 	const handlePasswordChange = () => {
@@ -76,6 +70,8 @@ const Profile = () => {
 			setConfirmPassword("");
 			setOldPassword("");
 			setErrorMessage("");
+		} else {
+			setErrorMessage("Старий пароль невірний");
 		}
 	};
 
@@ -86,35 +82,76 @@ const Profile = () => {
 					Profile Settings
 				</Typography>
 
-				<Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 3 }}>
+				<Box
+					sx={{
+						display: "flex",
+						flexDirection: "column",
+						alignItems: "center",
+						mb: 3,
+					}}>
 					<Avatar src={user.avatar} sx={{ width: 100, height: 100, mb: 2 }} />
-					<TextField label='Avatar URL' variant='outlined' fullWidth margin='normal' value={newAvatarUrl} onChange={(e) => setNewAvatarUrl(e.target.value)} />
+					<TextField
+						label='Avatar URL'
+						variant='outlined'
+						fullWidth
+						margin='normal'
+						value={newAvatarUrl}
+						onChange={(e) => setNewAvatarUrl(e.target.value)}
+					/>
 					<Button variant='contained' onClick={handleAvatarChange} fullWidth>
 						Update Avatar
 					</Button>
 				</Box>
 
-				<TextField label='Full Name' variant='outlined' fullWidth margin='normal' value={user.fullName} onChange={(e) => updateUser({ fullName: e.target.value })} />
+				<TextField
+					label='Full Name'
+					variant='outlined'
+					fullWidth
+					margin='normal'
+					value={user.fullName}
+					onChange={(e) => updateUser({ fullName: e.target.value })}
+				/>
 
-				<Typography variant='h6' sx={{ mt: 4 }}>User Roles</Typography>
-				{user.roles.length > 0 ? (
-					<List>
-						{user.roles.map((role, index) => (
-							<Chip sx={{ marginRight: "5px" }} key={index} label={role} color='secondary' />
-						))}
-					</List>
-				) : (
-					<Typography variant='body1'>No roles available.</Typography>
-				)}
-
-				<Typography variant='h6' sx={{ mt: 4 }}>Change Password</Typography>
-				<TextField label='Old Password' variant='outlined' type='password' fullWidth margin='normal' value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} />
-				<TextField label='New Password' variant='outlined' type='password' fullWidth margin='normal' value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-				<TextField label='Confirm Password' variant='outlined' type='password' fullWidth margin='normal' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+				<Typography variant='h6' sx={{ mt: 4 }}>
+					Change Password
+				</Typography>
+				<TextField
+					label='Old Password'
+					variant='outlined'
+					type='password'
+					fullWidth
+					margin='normal'
+					value={oldPassword}
+					onChange={(e) => setOldPassword(e.target.value)}
+				/>
+				<TextField
+					label='New Password'
+					variant='outlined'
+					type='password'
+					fullWidth
+					margin='normal'
+					value={newPassword}
+					onChange={(e) => setNewPassword(e.target.value)}
+				/>
+				<TextField
+					label='Confirm Password'
+					variant='outlined'
+					type='password'
+					fullWidth
+					margin='normal'
+					value={confirmPassword}
+					onChange={(e) => setConfirmPassword(e.target.value)}
+				/>
 				{errorMessage && (
-					<Typography color='error' sx={{ mt: 1, textAlign: "center" }}>{errorMessage}</Typography>
+					<Typography color='error' sx={{ mt: 1, textAlign: "center" }}>
+						{errorMessage}
+					</Typography>
 				)}
-				<Button variant='contained' onClick={handlePasswordChange} fullWidth sx={{ mt: 2 }}>
+				<Button
+					variant='contained'
+					onClick={handlePasswordChange}
+					fullWidth
+					sx={{ mt: 2 }}>
 					Update Password
 				</Button>
 			</Paper>
