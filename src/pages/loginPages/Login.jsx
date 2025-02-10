@@ -59,6 +59,7 @@ export default function SignIn({ setIsActive, setIsAdmin }) {
 		const user = {
 			email: userData.email,
 			avatar: userData.picture,
+			name: userData.name,
 			isActive: true,
 			isAdmin: false,
 		};

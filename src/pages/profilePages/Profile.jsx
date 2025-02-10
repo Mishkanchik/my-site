@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import {
 	TextField,
 	Button,
@@ -6,51 +6,30 @@ import {
 	Box,
 	Typography,
 	Paper,
+	Alert,
 } from "@mui/material";
+import userReducer from "../../store/reducers/userReduser";
+import {
+	loadUsers,
+	updateUser,
+} from "../../store/reducers/userReduser/actionUser";
 
 const Profile = () => {
-	const defaultAvatar =
-		"https://pngcore.com/files/preview/960x960/11694532441f7xttwthhk686wgcagm71b84znfjy39usdvu0yrjfvlxflwlhmgbus0szosphh85sfhz9mkj6rorpkf9aozsmwxxfwg1chfkmzez.png";
-
-	const [user, setUser] = useState({
-		fullName: "",
-		password: "",
-		avatar: defaultAvatar,
-	});
-
+	const [state, dispatch] = useReducer(userReducer, { user: {} });
+	const [newAvatarUrl, setNewAvatarUrl] = useState("");
 	const [newPassword, setNewPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [oldPassword, setOldPassword] = useState("");
-	const [newAvatarUrl, setNewAvatarUrl] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
-
+	const [newFullName, setNewFullName] = useState(state.user.fullName || "");
+	const [alertConfirmation, setAlertConfirmation] = useState(false);
 	useEffect(() => {
-		const savedUser = JSON.parse(localStorage.getItem("user"));
-		if (savedUser) {
-			setUser(savedUser);
-		}
+		dispatch(loadUsers());
 	}, []);
 
-	const updateUser = (updatedFields) => {
-		setUser((prevUser) => {
-			const updatedUser = { ...prevUser, ...updatedFields };
-			localStorage.setItem("user", JSON.stringify(updatedUser));
-
-			const users = JSON.parse(localStorage.getItem("users")) || [];
-			const index = users.findIndex((u) => u.email === prevUser.email);
-			if (index !== -1) {
-				users[index] = { ...users[index], ...updatedFields };
-				localStorage.setItem("users", JSON.stringify(users));
-			}
-
-			window.dispatchEvent(new Event("userUpdated"));
-			return updatedUser;
-		});
-	};
-
 	const handleAvatarChange = () => {
-		if (newAvatarUrl.trim() !== "") {
-			updateUser({ avatar: newAvatarUrl });
+		if (newAvatarUrl.trim()) {
+			dispatch(updateUser({ avatar: newAvatarUrl }));
 			setNewAvatarUrl("");
 		}
 	};
@@ -64,8 +43,8 @@ const Profile = () => {
 			setErrorMessage("Паролі не збігаються");
 			return;
 		}
-		if (oldPassword === user.password) {
-			updateUser({ password: newPassword });
+		if (oldPassword === state.user.password) {
+			dispatch(updateUser({ password: newPassword }));
 			setNewPassword("");
 			setConfirmPassword("");
 			setOldPassword("");
@@ -75,13 +54,20 @@ const Profile = () => {
 		}
 	};
 
+	const handleNameChange = () => {
+		if (newFullName.trim()) {
+			dispatch(updateUser({ fullName: newFullName }));
+			setAlertConfirmation(true);
+			setTimeout(() => setAlertConfirmation(false), 3000);
+		}
+	};
+
 	return (
 		<Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
 			<Paper elevation={3} sx={{ padding: 4, width: "100%", maxWidth: 600 }}>
 				<Typography variant='h5' gutterBottom>
 					Profile Settings
 				</Typography>
-
 				<Box
 					sx={{
 						display: "flex",
@@ -89,7 +75,10 @@ const Profile = () => {
 						alignItems: "center",
 						mb: 3,
 					}}>
-					<Avatar src={user.avatar} sx={{ width: 100, height: 100, mb: 2 }} />
+					<Avatar
+						src={state.user.avatar}
+						sx={{ width: 100, height: 100, mb: 2 }}
+					/>
 					<TextField
 						label='Avatar URL'
 						variant='outlined'
@@ -102,16 +91,27 @@ const Profile = () => {
 						Update Avatar
 					</Button>
 				</Box>
-
 				<TextField
 					label='Full Name'
 					variant='outlined'
 					fullWidth
 					margin='normal'
-					value={user.fullName}
-					onChange={(e) => updateUser({ fullName: e.target.value })}
+					value={newFullName}
+					onChange={(e) => setNewFullName(e.target.value)}
 				/>
+				<Button
+					variant='contained'
+					onClick={handleNameChange}
+					fullWidth
+					sx={{ mt: 2 }}>
+					Change Name
+				</Button>
 
+				{alertConfirmation && (
+					<Alert severity='success' sx={{ mt: 2 }}>
+						Нікнейм збережено
+					</Alert>
+				)}
 				<Typography variant='h6' sx={{ mt: 4 }}>
 					Change Password
 				</Typography>

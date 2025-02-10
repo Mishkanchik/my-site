@@ -10,6 +10,7 @@ import {
 	Avatar,
 	Tooltip,
 	MenuItem,
+	Button,
 } from "@mui/material";
 import AdbIcon from "@mui/icons-material/Adb";
 import { useNavigate } from "react-router";
@@ -110,6 +111,15 @@ function HeaderMainReg({ setIsActive }) {
 								</MenuItem>
 							))}
 						</Menu>
+						<Button
+							sx={{
+								ml: 2,
+								bgcolor: "#635985",
+								color: "white",
+							}}
+							onClick={() => navigate("/addAuto")}>
+							Add Auto
+						</Button>
 					</Box>
 				</Toolbar>
 			</Container>

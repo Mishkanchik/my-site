@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import Profile from "./pages/profilePages/Profile";
 import AdminPanel from "./pages/adminPages/AdminPanel";
 import PageNotFound from "./pages/errorPages/Error";
+import AddCarPage from "./pages/addAuto/addAuto";
 
 function App() {
 	const [isAdmin, setIsAdmin] = useState(false);
@@ -45,7 +46,8 @@ function App() {
 							path='signUp'
 							element={<SignUp setIsActive={setIsActive} />}
 						/>
-						<Route path='*' element={<PageNotFound/>} />
+
+						<Route path='*' element={<PageNotFound />} />
 					</Route>
 				) : isAdmin ? (
 					<Route
@@ -55,17 +57,16 @@ function App() {
 						}>
 						<Route index element={<Blog />} />
 						<Route path='/adminPanel' element={<AdminPanel />} />
-						<Route path='*' element={<PageNotFound/>} />
+						<Route path='*' element={<PageNotFound />} />
 					</Route>
 				) : (
 					<Route path='/' element={<MainReg setIsActive={setIsActive} />}>
 						<Route index element={<Blog />} />
 						<Route path='profile' element={<Profile />} />
-						<Route path='*' element={<PageNotFound/>} />
+						<Route path='addAuto' element={<AddCarPage />} />
+						<Route path='*' element={<PageNotFound />} />
 					</Route>
 				)}
-
-				
 			</Routes>
 		</>
 	);
